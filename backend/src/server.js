@@ -35,10 +35,29 @@ app.use(
   })
 );
 
-// CORS configuration - Allow credentials for HTTP-only cookies
+// Flexible CORS Configuration for Production Vercel & Local Dev
 app.use(
   cors({
-    origin: FRONTEND_URL,
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+
+      const allowedOrigins = [
+        FRONTEND_URL,
+        'https://her-little-universe-five.vercel.app',
+        'http://localhost:5173',
+        'http://localhost:3000',
+      ].filter(Boolean);
+
+      if (
+        allowedOrigins.includes(origin) ||
+        origin.endsWith('.vercel.app') ||
+        process.env.NODE_ENV !== 'production'
+      ) {
+        return callback(null, true);
+      }
+
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
@@ -53,7 +72,7 @@ app.use(cookieParser());
 // Rate Limiting for Authentication Endpoints
 const authRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 20, // limit each IP to 20 auth requests per windowMs
+  max: 30, // limit each IP to 30 auth requests per windowMs
   message: {
     success: false,
     message: 'Too many attempts. Please try again later.',

@@ -40,8 +40,9 @@ export const AdminDashboard = () => {
   });
 
   const [activities, setActivities] = useState([]);
-  const [streak, setStreak] = useState(2);
+  const [streak, setStreak] = useState(1);
   const [isTomorrowMissing, setIsTomorrowMissing] = useState(false);
+  const [todaySong, setTodaySong] = useState(null);
   const [surpriseReadiness, setSurpriseReadiness] = useState({ today: false, tomorrow: false });
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
@@ -74,6 +75,15 @@ export const AdminDashboard = () => {
       let surprisesCount = 0;
 
       try {
+        const todaySongRes = await api.getTodaySong();
+        if (todaySongRes.success && todaySongRes.data) {
+          setTodaySong(todaySongRes.data);
+        } else if (songs && songs.length > 0) {
+          setTodaySong(songs[0]);
+        } else {
+          setTodaySong(null);
+        }
+
         const storyRes = await api.getStoryEvents();
         if (storyRes.success && Array.isArray(storyRes.data)) storyCount = storyRes.data.length;
         const thingsRes = await api.getLittleThings();
@@ -83,20 +93,20 @@ export const AdminDashboard = () => {
         const surprisesRes = await api.getSurprises();
         if (surprisesRes.success && Array.isArray(surprisesRes.data)) surprisesCount = surprisesRes.data.length;
       } catch (err) {
-        // Fallback
+        setTodaySong(null);
       }
 
       setCounts({
-        songs: songs.length,
-        memories: memories.length,
-        letters: letters.length,
-        secret: secret.length,
+        songs: songs ? songs.length : 0,
+        memories: memories ? memories.length : 0,
+        letters: letters ? letters.length : 0,
+        secret: secret ? secret.length : 0,
         story: storyCount,
         littleThings: thingsCount,
         stars: starsCount,
         surprises: surprisesCount,
       });
-      setActivities(acts);
+      setActivities(acts || []);
 
       // Check if tomorrow's song is scheduled
       const today = new Date();
@@ -104,9 +114,9 @@ export const AdminDashboard = () => {
       tomorrow.setDate(tomorrow.getDate() + 1);
       const tomorrowStr = tomorrow.toISOString().split('T')[0];
 
-      const tomorrowSong = songs.find((s) => s.date === tomorrowStr);
+      const tomorrowSong = (songs || []).find((s) => s.date === tomorrowStr);
       setIsTomorrowMissing(!tomorrowSong);
-      setStreak(songs.length > 0 ? songs.length : 1);
+      setStreak(songs && songs.length > 0 ? songs.length : 1);
 
       // Check surprise readiness
       try {
@@ -132,12 +142,12 @@ export const AdminDashboard = () => {
             hero: Boolean(cfg.heroMessage),
             letter: Boolean(cfg.birthdayLetter),
             finalMessage: Boolean(cfg.finalMessage),
-            song: Boolean(cfg.birthdaySongId || songs.length > 0),
-            memories: memories.length > 0,
+            song: Boolean(cfg.birthdaySongId || (songs && songs.length > 0)),
+            memories: memories && memories.length > 0,
             story: storyCount > 0,
             littleThings: thingsCount > 0,
             universe: starsCount > 0,
-            secret: secret.length > 0,
+            secret: secret && secret.length > 0,
           });
         }
       } catch (err) {
@@ -174,7 +184,7 @@ export const AdminDashboard = () => {
   }, []);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
@@ -277,7 +287,7 @@ export const AdminDashboard = () => {
               </span>
             </div>
           </div>
-          <button onClick={() => navigate('/admin/surprises')} className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold">
+          <button onClick={() => navigate('/admin/surprises')} className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold cursor-pointer">
             Manage
           </button>
         </div>
@@ -304,7 +314,7 @@ export const AdminDashboard = () => {
               </span>
             </div>
           </div>
-          <button onClick={() => navigate('/admin/surprises')} className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold">
+          <button onClick={() => navigate('/admin/surprises')} className="px-3 py-1.5 rounded-lg bg-slate-900 text-white text-xs font-semibold cursor-pointer">
             Manage
           </button>
         </div>
@@ -451,26 +461,38 @@ export const AdminDashboard = () => {
               <span className="text-xs uppercase tracking-widest font-mono font-semibold text-slate-500">
                 TODAY'S SONG
               </span>
-              <span className="px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-semibold font-mono">
-                ✓ Published & Active
+              <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold font-mono border ${todaySong ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-100 text-slate-600 border-slate-200'}`}>
+                {todaySong ? '✓ Published & Active' : 'No Song Scheduled'}
               </span>
             </div>
 
-            <div className="flex items-center space-x-4 mb-4">
-              <img
-                src={siteConfig.todaysSong.cover}
-                alt={siteConfig.todaysSong.title}
-                className="w-16 h-16 rounded-2xl object-cover border border-slate-200"
-              />
-              <div>
-                <h4 className="text-lg font-bold text-slate-900">
-                  {siteConfig.todaysSong.title}
-                </h4>
-                <p className="text-xs text-slate-500 font-medium">
-                  {siteConfig.todaysSong.artist}
-                </p>
+            {todaySong ? (
+              <div className="flex items-center space-x-4 mb-4">
+                {todaySong.cover || todaySong.coverUrl ? (
+                  <img
+                    src={todaySong.cover || todaySong.coverUrl}
+                    alt={todaySong.title}
+                    className="w-16 h-16 rounded-2xl object-cover border border-slate-200"
+                  />
+                ) : (
+                  <div className="w-16 h-16 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-500 font-bold text-xl">
+                    ♪
+                  </div>
+                )}
+                <div>
+                  <h4 className="text-lg font-bold text-slate-900">
+                    {todaySong.title}
+                  </h4>
+                  <p className="text-xs text-slate-500 font-medium">
+                    {todaySong.artist}
+                  </p>
+                </div>
               </div>
-            </div>
+            ) : (
+              <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-center mb-4 text-xs text-slate-500">
+                No song scheduled for today yet.
+              </div>
+            )}
           </div>
 
           <button
