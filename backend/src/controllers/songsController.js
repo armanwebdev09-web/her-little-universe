@@ -5,23 +5,34 @@ let songsStore = [
   {
     id: "song-1",
     dayNumber: 1,
-    title: "Until I Found You",
-    artist: "Stephen Sanchez",
+    title: "Khat",
+    artist: "Personal Soundtrack",
     coverUrl: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    message: "I picked this one because it reminded me of the way you make ordinary moments feel special.",
+    audioUrl: "/uploads/public/audio/khat.mp3",
+    message: "I picked this song because it reminds me of you every time I listen.",
     date: getTodayDateString(),
     status: "PUBLISHED",
   },
   {
     id: "song-2",
     dayNumber: 2,
-    title: "Lover",
-    artist: "Taylor Swift",
+    title: "Jab Tak",
+    artist: "Personal Soundtrack",
     coverUrl: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop",
-    audioUrl: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
-    message: "Can I go where you go? Can we always be this close?",
-    date: "2024-02-15",
+    audioUrl: "/uploads/public/audio/jab_tak.mp3",
+    message: "A song for our quietest, sweetest moments together.",
+    date: "2026-09-13",
+    status: "PUBLISHED",
+  },
+  {
+    id: "song-3",
+    dayNumber: 3,
+    title: "With You",
+    artist: "Personal Soundtrack",
+    coverUrl: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+    audioUrl: "/uploads/public/audio/with_you.mp3",
+    message: "Because every ordinary day feels special when I am with you.",
+    date: "2026-09-14",
     status: "PUBLISHED",
   },
 ];
@@ -38,7 +49,7 @@ export const getTodaySong = async (req, res, next) => {
 
     return res.json({
       success: true,
-      data: song ? sanitizePublicSong(song) : null,
+      data: song ? sanitizePublicSong(song) : (songsStore[0] ? sanitizePublicSong(songsStore[0]) : null),
     });
   } catch (err) {
     next(err);
@@ -57,7 +68,7 @@ export const getUnlockedSongs = async (req, res, next) => {
 
     return res.json({
       success: true,
-      data: unlocked,
+      data: unlocked.length > 0 ? unlocked : songsStore.map(sanitizePublicSong),
     });
   } catch (err) {
     next(err);
@@ -77,7 +88,7 @@ export const getSongs = async (req, res, next) => {
         .filter((s) => s.status === 'PUBLISHED' && s.date <= todayStr)
         .map(sanitizePublicSong);
 
-      return res.json({ success: true, data: publicSongs });
+      return res.json({ success: true, data: publicSongs.length > 0 ? publicSongs : songsStore.map(sanitizePublicSong) });
     }
 
     // Admin view includes scheduling countdowns and status indicators
@@ -151,7 +162,7 @@ export const createSong = async (req, res, next) => {
       date,
       dayNumber: dayNumber || songsStore.length + 1,
       coverUrl: coverUrl || cover || 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop',
-      audioUrl: audioUrl || audio || 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      audioUrl: audioUrl || audio || '/uploads/public/audio/khat.mp3',
       message: message || '',
       status: validStatus,
       createdAt: new Date().toISOString(),
@@ -175,7 +186,7 @@ export const updateSong = async (req, res, next) => {
       return res.status(404).json({ success: false, message: 'Song not found' });
     }
 
-    const updated = { ...songsStore[index], ...req.body, updatedAt: new Date().toISOString() };
+    const updated = { ...secretItemsStore ? songsStore[index] : songsStore[index], ...req.body, updatedAt: new Date().toISOString() };
     songsStore[index] = updated;
 
     await logActivity('UPDATE_SONG', 'Song', id);
