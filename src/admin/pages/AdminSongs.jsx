@@ -36,7 +36,7 @@ export const AdminSongs = () => {
 
   const fetchSongs = async () => {
     const list = await adminService.getSongs();
-    setSongs(list);
+    setSongs(list || []);
   };
 
   useEffect(() => {
@@ -50,8 +50,8 @@ export const AdminSongs = () => {
       artist: '',
       date: presetDate || new Date().toISOString().split('T')[0],
       dayNumber: songs.length + 1,
-      cover: 'https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop',
-      audio: 'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3',
+      cover: '',
+      audio: '',
       message: '',
       status: 'Published',
     });
@@ -60,7 +60,7 @@ export const AdminSongs = () => {
 
   const handleOpenEdit = (song) => {
     setEditingSong(song);
-    setFormData({ ...song, cover: song.cover || song.coverUrl, audio: song.audio || song.audioUrl });
+    setFormData({ ...song, cover: song.cover || song.coverUrl || '', audio: song.audio || song.audioUrl || '' });
     setIsModalOpen(true);
   };
 
@@ -83,31 +83,31 @@ export const AdminSongs = () => {
   const filteredSongs = songs.filter((song) => {
     const matchesFilter = filter === 'ALL' || (song.status && song.status.toUpperCase() === filter);
     const matchesSearch =
-      song.title.toLowerCase().includes(search.toLowerCase()) ||
-      song.artist.toLowerCase().includes(search.toLowerCase());
+      (song.title || '').toLowerCase().includes(search.toLowerCase()) ||
+      (song.artist || '').toLowerCase().includes(search.toLowerCase());
     return matchesFilter && matchesSearch;
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Daily Songs</h1>
-          <p className="text-xs text-slate-500 font-medium">One song scheduled for every single day.</p>
+          <p className="text-xs text-slate-500 font-medium">Manage and schedule songs for her soundtrack.</p>
         </div>
 
         <div className="flex items-center space-x-3">
           <div className="bg-white border border-slate-200 rounded-xl p-1 flex items-center space-x-1">
             <button
               onClick={() => setViewMode('table')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${viewMode === 'table' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               List View
             </button>
             <button
               onClick={() => setViewMode('calendar')}
-              className={`px-3 py-1.5 rounded-lg text-xs font-semibold ${viewMode === 'calendar' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
+              className={`px-3 py-1.5 rounded-lg text-xs font-semibold cursor-pointer ${viewMode === 'calendar' ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-100'}`}
             >
               Calendar Schedule
             </button>
@@ -115,7 +115,7 @@ export const AdminSongs = () => {
 
           <button
             onClick={() => handleOpenAdd()}
-            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs tracking-wider uppercase transition-colors cursor-pointer"
+            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold text-xs tracking-wider uppercase transition-colors cursor-pointer shadow-sm"
           >
             <Plus className="w-4 h-4" />
             <span>Add Song</span>
@@ -178,7 +178,13 @@ export const AdminSongs = () => {
                   </span>
                 </div>
                 <div className="flex items-center space-x-2.5">
-                  <img src={s.cover || s.coverUrl} alt={s.title} className="w-9 h-9 rounded-lg object-cover" />
+                  {s.cover || s.coverUrl ? (
+                    <img src={s.cover || s.coverUrl} alt={s.title} className="w-9 h-9 rounded-lg object-cover" />
+                  ) : (
+                    <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-xs">
+                      ♪
+                    </div>
+                  )}
                   <div>
                     <h4 className="text-xs font-bold text-slate-900 line-clamp-1">{s.title}</h4>
                     <p className="text-[11px] text-slate-500 line-clamp-1">{s.artist}</p>
@@ -207,7 +213,7 @@ export const AdminSongs = () => {
               {filteredSongs.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="py-8 text-center text-slate-400 italic">
-                    No songs found. Add the first song to start the soundtrack.
+                    No songs in database yet. Click "+ Add Song" to add your first real song.
                   </td>
                 </tr>
               ) : (
@@ -218,7 +224,13 @@ export const AdminSongs = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center space-x-3">
-                        <img src={song.cover || song.coverUrl} alt={song.title} className="w-10 h-10 rounded-lg object-cover" />
+                        {song.cover || song.coverUrl ? (
+                          <img src={song.cover || song.coverUrl} alt={song.title} className="w-10 h-10 rounded-lg object-cover" />
+                        ) : (
+                          <div className="w-10 h-10 rounded-lg bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-sm">
+                            ♪
+                          </div>
+                        )}
                         <div>
                           <span className="font-semibold text-slate-900 block">{song.title}</span>
                           <span className="text-slate-500 text-[11px]">{song.artist}</span>
@@ -237,21 +249,21 @@ export const AdminSongs = () => {
                           setPreviewSong(song);
                           setIsPreviewPlaying(false);
                         }}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
                         title="Preview"
                       >
                         <Eye className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleOpenEdit(song)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-100 cursor-pointer"
                         title="Edit"
                       >
                         <Edit2 className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => setDeleteTargetId(song.id)}
-                        className="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50"
+                        className="p-1.5 rounded-lg text-rose-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
                         title="Delete"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -268,41 +280,53 @@ export const AdminSongs = () => {
       {/* Mobile Card List View */}
       {viewMode === 'table' && (
         <div className="md:hidden space-y-3">
-          {filteredSongs.map((song) => (
-            <div key={song.id} className="p-4 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-2xs">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-mono font-bold text-slate-900">
-                  Day #{song.dayNumber || song.id}
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  {song.countdownText || song.status || 'Published'}
-                </span>
-              </div>
-
-              <div className="flex items-center space-x-3">
-                <img src={song.cover || song.coverUrl} alt={song.title} className="w-12 h-12 rounded-xl object-cover" />
-                <div>
-                  <h4 className="text-sm font-semibold text-slate-900">{song.title}</h4>
-                  <p className="text-xs text-slate-500">{song.artist}</p>
-                </div>
-              </div>
-
-              <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
-                <span className="font-mono text-slate-400">{song.date}</span>
-                <div className="space-x-2">
-                  <button onClick={() => setPreviewSong(song)} className="p-1 text-slate-500">
-                    <Eye className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => handleOpenEdit(song)} className="p-1 text-slate-500">
-                    <Edit2 className="w-4 h-4" />
-                  </button>
-                  <button onClick={() => setDeleteTargetId(song.id)} className="p-1 text-rose-500">
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+          {filteredSongs.length === 0 ? (
+            <div className="p-6 text-center text-slate-400 text-xs italic bg-white rounded-2xl border border-slate-200">
+              No songs in database yet. Click "+ Add Song" to add your first real song.
             </div>
-          ))}
+          ) : (
+            filteredSongs.map((song) => (
+              <div key={song.id} className="p-4 rounded-2xl bg-white border border-slate-200 space-y-3 shadow-2xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-mono font-bold text-slate-900">
+                    Day #{song.dayNumber || song.id}
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full text-[9px] font-mono font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    {song.countdownText || song.status || 'Published'}
+                  </span>
+                </div>
+
+                <div className="flex items-center space-x-3">
+                  {song.cover || song.coverUrl ? (
+                    <img src={song.cover || song.coverUrl} alt={song.title} className="w-12 h-12 rounded-xl object-cover" />
+                  ) : (
+                    <div className="w-12 h-12 rounded-xl bg-slate-200 flex items-center justify-center text-slate-500 font-bold text-base">
+                      ♪
+                    </div>
+                  )}
+                  <div>
+                    <h4 className="text-sm font-semibold text-slate-900">{song.title}</h4>
+                    <p className="text-xs text-slate-500">{song.artist}</p>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <span className="font-mono text-slate-400">{song.date}</span>
+                  <div className="space-x-2">
+                    <button onClick={() => setPreviewSong(song)} className="p-1 text-slate-500">
+                      <Eye className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => handleOpenEdit(song)} className="p-1 text-slate-500">
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button onClick={() => setDeleteTargetId(song.id)} className="p-1 text-rose-500">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
         </div>
       )}
 
@@ -328,6 +352,7 @@ export const AdminSongs = () => {
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     required
+                    placeholder="e.g. Khat"
                     className="w-full py-2 px-3 rounded-xl border border-slate-300 text-slate-900"
                   />
                 </div>
@@ -338,6 +363,7 @@ export const AdminSongs = () => {
                     value={formData.artist}
                     onChange={(e) => setFormData({ ...formData, artist: e.target.value })}
                     required
+                    placeholder="e.g. Personal Soundtrack"
                     className="w-full py-2 px-3 rounded-xl border border-slate-300 text-slate-900"
                   />
                 </div>
@@ -351,6 +377,7 @@ export const AdminSongs = () => {
                     value={formData.date}
                     onChange={(e) => setFormData({ ...formData, date: e.target.value })}
                     required
+                    placeholder="YYYY-MM-DD"
                     className="w-full py-2 px-3 rounded-xl border border-slate-300 text-slate-900 font-mono"
                   />
                 </div>
@@ -396,10 +423,10 @@ export const AdminSongs = () => {
               </div>
 
               <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-100">
-                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-medium">
+                <button type="button" onClick={() => setIsModalOpen(false)} className="px-4 py-2 rounded-xl bg-slate-100 text-slate-700 font-medium cursor-pointer">
                   Cancel
                 </button>
-                <button type="submit" className="px-5 py-2 rounded-xl bg-rose-600 text-white font-semibold shadow-sm hover:bg-rose-500">
+                <button type="submit" className="px-5 py-2 rounded-xl bg-slate-900 text-white font-semibold shadow-sm hover:bg-slate-800 cursor-pointer">
                   Save Song
                 </button>
               </div>

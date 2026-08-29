@@ -6,16 +6,14 @@ import { MiniPlayer } from '../components/MiniPlayer';
 import { songsData } from '../data/songsData';
 import { siteConfig } from '../data/siteConfig';
 import { api } from '../services/api';
-import { Music, Sparkles } from 'lucide-react';
+import { Music, Heart } from 'lucide-react';
 
 export const Songs = () => {
   const playerRef = useRef(null);
-  const [unlockedSongs, setUnlockedSongs] = useState(songsData);
+  const [unlockedSongs, setUnlockedSongs] = useState([]);
   const [currentSong, setCurrentSong] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [showMiniPlayer, setShowMiniPlayer] = useState(false);
-
-  const todayStr = new Date().toISOString().split('T')[0];
 
   // Fetch today's song and unlocked past soundtrack from backend API on mount
   useEffect(() => {
@@ -24,17 +22,22 @@ export const Songs = () => {
         const todayRes = await api.getTodaySong();
         const unlockedRes = await api.getUnlockedSongs();
 
-        if (unlockedRes.success && Array.isArray(unlockedRes.data) && unlockedRes.data.length > 0) {
+        if (unlockedRes.success && Array.isArray(unlockedRes.data)) {
           setUnlockedSongs(unlockedRes.data);
+        } else {
+          setUnlockedSongs([]);
         }
 
         if (todayRes.success && todayRes.data) {
           setCurrentSong(todayRes.data);
         } else if (unlockedRes.success && unlockedRes.data && unlockedRes.data.length > 0) {
           setCurrentSong(unlockedRes.data[0]);
+        } else {
+          setCurrentSong(null);
         }
       } catch (err) {
-        // Fallback to local default dataset
+        setUnlockedSongs([]);
+        setCurrentSong(null);
       }
     };
 
@@ -95,19 +98,19 @@ export const Songs = () => {
   };
 
   return (
-    <div className="relative z-10 pb-20">
+    <div className="relative z-10 pb-20 font-sans">
       {/* Top Banner Hero */}
       <DailySongHero
         unlockedCount={unlockedSongs.length}
         totalCount={unlockedSongs.length}
       />
 
-      {unlockedSongs.length > 0 ? (
+      {unlockedSongs.length > 0 && currentSong ? (
         <>
           {/* Main Music Player Card */}
           <MusicPlayer
             playerRef={playerRef}
-            currentSong={currentSong || unlockedSongs[0]}
+            currentSong={currentSong}
             isPlaying={isPlaying}
             onTogglePlay={(playingState) => setIsPlaying(playingState)}
             onSelectPrev={handleSelectPrev}
@@ -119,7 +122,7 @@ export const Songs = () => {
           {/* Daily Song Timeline */}
           <SongTimeline
             songs={unlockedSongs}
-            currentSong={currentSong || unlockedSongs[0]}
+            currentSong={currentSong}
             isPlaying={isPlaying}
             onSelectSong={handleSelectSong}
             isSongLocked={() => false}
@@ -128,28 +131,31 @@ export const Songs = () => {
       ) : (
         /* Empty State */
         <section className="py-20 px-6 text-center">
-          <div className="max-w-md mx-auto p-12 rounded-3xl bg-[#151B30]/60 border border-[#D9A6B2]/15">
-            <div className="w-12 h-12 rounded-full bg-[#101528] border border-[#D9A6B2]/20 flex items-center justify-center mx-auto mb-4 text-[#D8B477]">
+          <div className="max-w-md mx-auto p-12 rounded-3xl bg-[#151B30]/60 border border-[#D9A6B2]/15 shadow-xl">
+            <div className="w-12 h-12 rounded-full bg-[#101528] border border-[#D9A6B2]/20 flex items-center justify-center mx-auto mb-4 text-[#D9A6B2]">
               <Music className="w-6 h-6 animate-pulse" />
             </div>
-            <h3 className="text-2xl font-serif text-[#F8F5F0] font-normal mb-2">
-              Today's little surprise hasn't arrived yet.
+            <h3 className="text-2xl font-serif text-[#F8F5F0] font-normal mb-2 flex items-center justify-center gap-2">
+              <span>No song for today yet</span>
+              <Heart className="w-5 h-5 text-[#D9A6B2] fill-[#D9A6B2]" />
             </h3>
             <p className="text-sm text-[#B8B6C4] font-light">
-              Check back tomorrow for the next song in your soundtrack.
+              Add a new song in the Admin Panel to unlock your daily soundtrack.
             </p>
           </div>
         </section>
       )}
 
       {/* Sticky Mini Player on Scroll */}
-      <MiniPlayer
-        currentSong={currentSong}
-        isPlaying={isPlaying}
-        onTogglePlay={(state) => setIsPlaying(state)}
-        onScrollToPlayer={scrollToPlayer}
-        visible={showMiniPlayer && currentSong !== null}
-      />
+      {currentSong && (
+        <MiniPlayer
+          currentSong={currentSong}
+          isPlaying={isPlaying}
+          onTogglePlay={(state) => setIsPlaying(state)}
+          onScrollToPlayer={scrollToPlayer}
+          visible={showMiniPlayer}
+        />
+      )}
     </div>
   );
 };

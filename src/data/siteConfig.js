@@ -16,15 +16,8 @@ export const siteConfig = {
   allowBypassLock: false,
   allowBypassBirthdayLock: false,
 
-  // Today's song configuration
-  todaysSong: {
-    title: "Khat",
-    artist: "Personal Soundtrack",
-    cover: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
-    audio: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
-    message: "I picked this song because it reminds me of you every time I listen.",
-    durationSeconds: 180,
-  },
+  // Today's song configuration (Null by default, populates from Admin database)
+  todaysSong: null,
 
   // Central Core Emotional Quote
   quote: {
