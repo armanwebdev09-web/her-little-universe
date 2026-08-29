@@ -13,13 +13,21 @@ import { UniverseRecap } from '../../components/UniverseRecap';
 import { BirthdayEnding } from '../../components/BirthdayEnding';
 import { api } from '../../services/api';
 
+const defaultLetterText = typeof birthdayData.birthdayLetter === 'string'
+  ? birthdayData.birthdayLetter
+  : (birthdayData.birthdayLetter?.content || '');
+
+const defaultFinalMessageText = typeof birthdayData.finalMessage === 'string'
+  ? birthdayData.finalMessage
+  : (birthdayData.finalMessage?.paragraph || '');
+
 export const AdminBirthday = () => {
   const { showToast } = useAdminToast();
   const [bdayDate, setBdayDate] = useState(siteConfig.birthdayDate);
   const [herName, setHerName] = useState(siteConfig.herName);
-  const [heroMessage, setHeroMessage] = useState(birthdayData.subheading);
-  const [birthdayLetter, setBirthdayLetter] = useState(birthdayData.letter.paragraphs.join("\n\n"));
-  const [finalMessage, setFinalMessage] = useState(birthdayData.finalMessage.paragraph);
+  const [heroMessage, setHeroMessage] = useState(birthdayData.subheading || '');
+  const [birthdayLetter, setBirthdayLetter] = useState(defaultLetterText);
+  const [finalMessage, setFinalMessage] = useState(defaultFinalMessageText);
   const [statusState, setStatusState] = useState('BEFORE_BIRTHDAY');
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
@@ -27,17 +35,17 @@ export const AdminBirthday = () => {
     const fetchStatus = async () => {
       try {
         const res = await api.getBirthdayStatus();
-        if (res.success && res.data) {
+        if (res && res.success && res.data) {
           setStatusState(res.data.state);
           setBdayDate(res.data.birthdayDate || siteConfig.birthdayDate);
           setHerName(res.data.herName || siteConfig.herName);
         }
 
         const configRes = await api.getBirthdayConfig();
-        if (configRes.success && configRes.data) {
-          setHeroMessage(configRes.data.heroMessage || birthdayData.subheading);
-          setBirthdayLetter(configRes.data.birthdayLetter || birthdayData.letter.paragraphs.join("\n\n"));
-          setFinalMessage(configRes.data.finalMessage || birthdayData.finalMessage.paragraph);
+        if (configRes && configRes.success && configRes.data) {
+          setHeroMessage(configRes.data.heroMessage || birthdayData.subheading || '');
+          setBirthdayLetter(configRes.data.birthdayLetter || defaultLetterText);
+          setFinalMessage(configRes.data.finalMessage || defaultFinalMessageText);
         }
       } catch (err) {
         // Fallback
@@ -172,7 +180,7 @@ export const AdminBirthday = () => {
               rows="3"
               value={finalMessage}
               onChange={(e) => setFinalMessage(e.target.value)}
-              className="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 text-slate-900 font-serif"
+              className="w-full py-2.5 px-3.5 rounded-xl border border-slate-300 text-[#080B16] font-serif"
             />
           </div>
 
