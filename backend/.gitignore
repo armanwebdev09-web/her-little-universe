@@ -1,0 +1,12 @@
+# Environment & Secrets
+.env
+.env.local
+.env.*
+
+# Node Dependencies
+node_modules/
+npm-debug.log*
+
+# Uploads & Temp Files
+uploads/private/
+scratch/

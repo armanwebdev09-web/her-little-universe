@@ -1,0 +1,160 @@
+/**
+ * HER LITTLE UNIVERSE - STAR MAP DATA
+ * 
+ * Each star represents a memory in the night sky.
+ * Positions are expressed as percentage coordinates (x: 0-100%, y: 0-100%).
+ */
+
+export const universeStarsData = [
+  {
+    id: 1,
+    title: "The Beginning",
+    date: "14 FEB 2024",
+    category: "BEGINNING",
+    description: "The moment our story started. A simple spark in an infinite universe.",
+    image: "https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?q=80&w=800&auto=format&fit=crop",
+    position: { x: 18, y: 22 },
+    constellationGroup: 1,
+  },
+  {
+    id: 2,
+    title: "First Conversation",
+    date: "28 MAR 2024",
+    category: "MEMORY",
+    description: "Hours flew by like seconds as we talked under the stars.",
+    image: null,
+    position: { x: 34, y: 15 },
+    constellationGroup: 1,
+  },
+  {
+    id: 3,
+    title: "The Midnight Walk",
+    date: "15 MAY 2024",
+    category: "SPECIAL",
+    description: "Walking down quiet streets with nothing but streetlights and whispers.",
+    image: "https://images.unsplash.com/photo-1509198397868-475647b2a1e5?q=80&w=800&auto=format&fit=crop",
+    position: { x: 52, y: 28 },
+    constellationGroup: 1,
+  },
+  {
+    id: 4,
+    title: "First Coffee Date",
+    date: "10 JUN 2024",
+    category: "MEMORY",
+    description: "Warm vanilla lattes, nervous smiles, and shared laughter.",
+    image: "https://images.unsplash.com/photo-1495446815901-a7297e633e8d?q=80&w=800&auto=format&fit=crop",
+    position: { x: 74, y: 18 },
+    constellationGroup: 1,
+  },
+  {
+    id: 5,
+    title: "Our First Roadtrip",
+    date: "20 JUL 2024",
+    category: "ADVENTURE",
+    description: "Windows down, cool breeze, and singing at full volume.",
+    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?q=80&w=800&auto=format&fit=crop",
+    position: { x: 86, y: 35 },
+    constellationGroup: 1,
+  },
+  {
+    id: 6,
+    title: "The Burned Pancake Incident",
+    date: "12 AUG 2024",
+    category: "FUNNY",
+    description: "We completely ruined the first batch, but pretended it was gourmet anyway!",
+    image: null,
+    position: { x: 12, y: 55 },
+    constellationGroup: 2,
+  },
+  {
+    id: 7,
+    title: "Sunset by the Pier",
+    date: "14 SEP 2024",
+    category: "SPECIAL",
+    description: "Watching the sky turn shades of violet and soft gold.",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=800&auto=format&fit=crop",
+    position: { x: 30, y: 48 },
+    constellationGroup: 2,
+  },
+  {
+    id: 8,
+    title: "Rainy Afternoon Warmth",
+    date: "10 OCT 2024",
+    category: "MEMORY",
+    description: "Cozy blankets, hot tea, and rain tapping against the window.",
+    image: null,
+    position: { x: 48, y: 62 },
+    constellationGroup: 2,
+  },
+  {
+    id: 9,
+    title: "The Surprise Flowers",
+    date: "05 NOV 2024",
+    category: "SPECIAL",
+    description: "Just a random Tuesday surprise to bring a smile to your face.",
+    image: "https://images.unsplash.com/photo-1518895949257-7621c3c786d7?q=80&w=800&auto=format&fit=crop",
+    position: { x: 68, y: 50 },
+    constellationGroup: 2,
+  },
+  {
+    id: 10,
+    title: "Starlight Wishes",
+    date: "15 DEC 2024",
+    category: "SPECIAL",
+    description: "Surrounded by warm fairy lights as midnight arrived.",
+    image: "https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=800&auto=format&fit=crop",
+    position: { x: 84, y: 68 },
+    constellationGroup: 2,
+  },
+  {
+    id: 11,
+    title: "Mountain Viewpoint",
+    date: "22 JAN 2025",
+    category: "ADVENTURE",
+    description: "Looking down at city lights shining like ground stars.",
+    image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?q=80&w=800&auto=format&fit=crop",
+    position: { x: 22, y: 80 },
+  },
+  {
+    id: 12,
+    title: "Lazy Sunday Pancakes",
+    date: "14 FEB 2025",
+    category: "MEMORY",
+    description: "Zero rush, zero stress. Just baking fresh food together.",
+    image: "https://images.unsplash.com/photo-1522673607200-164d1b6ce486?q=80&w=800&auto=format&fit=crop",
+    position: { x: 42, y: 82 },
+  },
+  {
+    id: 13,
+    title: "Today's Star",
+    date: "PRESENT",
+    category: "TODAY",
+    description: "Another little moment added to our infinite universe today.",
+    image: "https://images.unsplash.com/photo-1518199266791-5375a83190b7?q=80&w=800&auto=format&fit=crop",
+    position: { x: 64, y: 78 },
+    isTodayStar: true,
+  },
+];
+
+// Secret Easter Egg Star placed discreetly in the corner
+export const secretEasterEggStar = {
+  id: "easter-egg",
+  title: "Hidden Secret Star",
+  category: "SECRET",
+  description: "Well... you weren't supposed to find this so quickly. 👀",
+  position: { x: 94, y: 12 },
+  isEasterEgg: true,
+};
+
+// Constellation line connections between star IDs
+export const constellationLines = [
+  [1, 2],
+  [2, 3],
+  [3, 4],
+  [4, 5],
+  [6, 7],
+  [7, 8],
+  [8, 9],
+  [9, 10],
+  [3, 8], // Connecting the two main clusters gracefully
+];

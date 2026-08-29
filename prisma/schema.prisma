@@ -1,0 +1,307 @@
+// HER LITTLE UNIVERSE - PRISMA SCHEMA
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum SongStatus {
+  DRAFT
+  SCHEDULED
+  PUBLISHED
+}
+
+enum LetterType {
+  LOVE
+  OPEN_WHEN
+  BIRTHDAY
+  DAILY
+  SPECIAL
+  MEMORY
+  SECRET
+  NOTE
+}
+
+enum SecretItemType {
+  PHOTO
+  VIDEO
+  LETTER
+  MEMORY
+  NOTE
+}
+
+enum MediaVisibility {
+  PUBLIC
+  PRIVATE
+}
+
+enum MediaType {
+  IMAGE
+  AUDIO
+  VIDEO
+}
+
+enum SurpriseType {
+  MESSAGE
+  QUOTE
+  PHOTO
+  MEMORY
+  QUESTION
+  LETTER
+  SONG
+  SURPRISE
+}
+
+enum StoryCategory {
+  BEGINNING
+  MILESTONE
+  MEMORY
+  ADVENTURE
+  SPECIAL_DAY
+  FUNNY
+  GRATEFUL
+  FUTURE
+}
+
+enum LittleThingCategory {
+  FAVORITE
+  LITTLE_HABIT
+  INSIDE_JOKE
+  NICKNAME
+  PLACE
+  SONG
+  FOOD
+  MOVIE
+  BOOK
+  FLOWER
+  PHRASE
+  MEMORY
+  REASON
+  RANDOM
+}
+
+model AdminUser {
+  id           String    @id @default(uuid())
+  email        String    @unique
+  passwordHash String
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  lastLoginAt  DateTime?
+}
+
+model Song {
+  id            String         @id @default(uuid())
+  date          String
+  dayNumber     Int            @unique
+  title         String
+  artist        String
+  coverUrl      String
+  audioUrl      String
+  message       String?
+  status        SongStatus     @default(PUBLISHED)
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  birthdays     BirthdayConfig[]
+  surprises     DailySurprise[]
+  littleThings  LittleThing[]
+  letters       Letter[]
+  universeStars UniverseStar[]
+}
+
+model Memory {
+  id            String        @id @default(uuid())
+  title         String
+  date          String
+  category      String        @default("MOMENTS")
+  description   String?
+  imageUrl      String
+  favorite      Boolean       @default(false)
+  featured      Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  surprises     DailySurprise[]
+  storyEvents   StoryEvent[]
+  littleThings  LittleThing[]
+  letters       Letter[]
+  universeStars UniverseStar[]
+}
+
+model Letter {
+  id            String         @id @default(uuid())
+  title         String
+  type          LetterType     @default(OPEN_WHEN)
+  date          String
+  unlockDate    String?
+  preview       String?
+  openingLine   String?
+  content       String
+  closing       String?        @default("Always yours,")
+  signature     String?        @default("Me")
+  locked        Boolean        @default(false)
+  isPrivate     Boolean        @default(false)
+  featured      Boolean        @default(false)
+  position      Int            @default(0)
+  status        SongStatus     @default(PUBLISHED)
+  songId        String?
+  song          Song?          @relation(fields: [songId], references: [id])
+  memoryId      String?
+  memory        Memory?        @relation(fields: [memoryId], references: [id])
+  littleThingId String?
+  littleThing   LittleThing?   @relation(fields: [littleThingId], references: [id])
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+  surprises     DailySurprise[]
+  universeStars UniverseStar[]
+}
+
+model Quote {
+  id        String   @id @default(uuid())
+  quote     String
+  author    String?
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UniverseStar {
+  id            String       @id @default(uuid())
+  title         String
+  date          String
+  category      String       @default("MEMORY")
+  description   String?
+  imageUrl      String?
+  positionX     Float        @default(50.0)
+  positionY     Float        @default(50.0)
+  size          Float        @default(1.0)
+  brightness    Float        @default(1.0)
+  featured      Boolean      @default(false)
+  songId        String?
+  song          Song?        @relation(fields: [songId], references: [id])
+  memoryId      String?
+  memory        Memory?      @relation(fields: [memoryId], references: [id])
+  letterId      String?
+  letter        Letter?      @relation(fields: [letterId], references: [id])
+  littleThingId String?
+  littleThing   LittleThing? @relation(fields: [littleThingId], references: [id])
+  storyEventId  String?
+  storyEvent    StoryEvent?  @relation(fields: [storyEventId], references: [id])
+  status        SongStatus   @default(PUBLISHED)
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+}
+
+model SecretItem {
+  id          String         @id @default(uuid())
+  type        SecretItemType @default(PHOTO)
+  title       String
+  description String?
+  date        String
+  mediaUrl    String?
+  locked      Boolean        @default(true)
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+}
+
+model BirthdayConfig {
+  id                      String   @id @default(uuid())
+  birthdayDate            String   @default("2026-09-15T00:00:00")
+  herName                 String   @default("SOFIA")
+  heroMessage             String?
+  birthdayLetter          String?
+  birthdaySongId          String?
+  birthdaySong            Song?    @relation(fields: [birthdaySongId], references: [id])
+  finalMessage            String?
+  confettiEnabled         Boolean  @default(true)
+  openingAnimationEnabled Boolean  @default(true)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  action     String
+  entityType String
+  entityId   String?
+  createdAt  DateTime @default(now())
+}
+
+model MediaAsset {
+  id           String          @id @default(uuid())
+  storageKey   String          @unique
+  originalName String
+  mimeType     String
+  size         Int
+  visibility   MediaVisibility @default(PUBLIC)
+  mediaType    MediaType       @default(IMAGE)
+  url          String?
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+}
+
+model DailySurprise {
+  id           String       @id @default(uuid())
+  date         String
+  type         SurpriseType @default(MESSAGE)
+  title        String
+  message      String?
+  imageUrl     String?
+  songId       String?
+  song         Song?        @relation(fields: [songId], references: [id])
+  memoryId     String?
+  memory       Memory?      @relation(fields: [memoryId], references: [id])
+  letterId     String?
+  letter       Letter?      @relation(fields: [letterId], references: [id])
+  question     String?
+  answer       String?
+  buttonText   String?      @default("Open Surprise ❤️")
+  status       SongStatus   @default(PUBLISHED)
+  featured     Boolean      @default(false)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
+
+model StoryEvent {
+  id            String        @id @default(uuid())
+  title         String
+  date          String
+  category      StoryCategory @default(MILESTONE)
+  description   String
+  imageUrl      String?
+  memoryId      String?
+  memory        Memory?       @relation(fields: [memoryId], references: [id])
+  featured      Boolean       @default(false)
+  position      Int           @default(0)
+  status        SongStatus    @default(PUBLISHED)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  littleThings  LittleThing[]
+  universeStars UniverseStar[]
+}
+
+model LittleThing {
+  id            String              @id @default(uuid())
+  category      LittleThingCategory @default(FAVORITE)
+  title         String
+  value         String
+  description   String?
+  imageUrl      String?
+  icon          String?
+  songId        String?
+  song          Song?               @relation(fields: [songId], references: [id])
+  memoryId      String?
+  memory        Memory?             @relation(fields: [memoryId], references: [id])
+  storyEventId  String?
+  storyEvent    StoryEvent?         @relation(fields: [storyEventId], references: [id])
+  favorite      Boolean             @default(false)
+  featured      Boolean             @default(false)
+  position      Int                 @default(0)
+  status        SongStatus          @default(PUBLISHED)
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  letters       Letter[]
+  universeStars UniverseStar[]
+}
