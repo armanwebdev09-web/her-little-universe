@@ -1,10 +1,15 @@
 /**
  * HER LITTLE UNIVERSE - CENTRALIZED FRONTEND API CLIENT
  * 
+ * Automatically sanitizes and appends /api to VITE_API_URL if omitted.
  * Includes credentials ('include') to automatically attach HTTP-only cookies.
  */
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+let rawBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim().replace(/\/$/, '');
+if (!rawBase.endsWith('/api')) {
+  rawBase += '/api';
+}
+const API_BASE_URL = rawBase;
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
