@@ -6,6 +6,15 @@ const JWT_SECRET = process.env.JWT_SECRET || 'dev-jwt-super-secret-key-change-me
 // Development accepted secret keys
 const DEV_SECRET_KEYS = ['secret', 'love', 'universe', 'sofia', 'kashish', 'kashii'];
 
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER);
+
+const secretCookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  maxAge: 24 * 60 * 60 * 1000,
+};
+
 let secretItemsStore = [
   {
     id: "secret-1",
@@ -90,12 +99,7 @@ export const unlockSecret = async (req, res, next) => {
         { expiresIn: '24h' }
       );
 
-      res.cookie('secret_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 24 * 60 * 60 * 1000,
-      });
+      res.cookie('secret_token', token, secretCookieOptions);
 
       return res.json({
         success: true,
@@ -115,8 +119,8 @@ export const unlockSecret = async (req, res, next) => {
 export const lockSecret = async (req, res) => {
   res.clearCookie('secret_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   });
 
   return res.json({

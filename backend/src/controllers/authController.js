@@ -9,6 +9,15 @@ const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '7d';
 
 const DEV_ADMIN_EMAIL = "admin@herlittleuniverse.com";
 
+const isProduction = process.env.NODE_ENV === 'production' || Boolean(process.env.RENDER);
+
+const cookieOptions = {
+  httpOnly: true,
+  secure: isProduction,
+  sameSite: isProduction ? 'none' : 'lax',
+  maxAge: 7 * 24 * 60 * 60 * 1000,
+};
+
 export const loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
@@ -37,12 +46,7 @@ export const loginAdmin = async (req, res, next) => {
             { expiresIn: JWT_EXPIRES_IN }
           );
 
-          res.cookie('admin_token', token, {
-            httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'lax',
-            maxAge: 7 * 24 * 60 * 60 * 1000,
-          });
+          res.cookie('admin_token', token, cookieOptions);
 
           await prisma.adminUser.update({
             where: { id: dbUser.id },
@@ -70,12 +74,7 @@ export const loginAdmin = async (req, res, next) => {
         { expiresIn: JWT_EXPIRES_IN }
       );
 
-      res.cookie('admin_token', token, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 7 * 24 * 60 * 60 * 1000,
-      });
+      res.cookie('admin_token', token, cookieOptions);
 
       return res.json({
         success: true,
@@ -98,8 +97,8 @@ export const loginAdmin = async (req, res, next) => {
 export const logoutAdmin = async (req, res) => {
   res.clearCookie('admin_token', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
+    secure: isProduction,
+    sameSite: isProduction ? 'none' : 'lax',
   });
 
   return res.json({

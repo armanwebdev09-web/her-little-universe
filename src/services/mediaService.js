@@ -2,7 +2,11 @@
  * HER LITTLE UNIVERSE - FRONTEND MEDIA SERVICE
  */
 
-const API_BASE_URL = 'http://localhost:5000/api';
+let rawBase = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api').trim().replace(/\/$/, '');
+if (!rawBase.endsWith('/api')) {
+  rawBase += '/api';
+}
+const API_BASE_URL = rawBase;
 
 async function uploadFile(endpoint, file) {
   const formData = new FormData();

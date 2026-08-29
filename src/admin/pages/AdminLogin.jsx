@@ -12,18 +12,24 @@ export const AdminLogin = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(true);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!email || !password) {
       showToast('Please enter both email and password', 'error');
       return;
     }
 
-    const success = login(email, password);
+    setLoading(true);
+    const success = await login(email, password);
+    setLoading(false);
+
     if (success) {
       showToast('Signed in to Admin Dashboard');
       navigate('/admin/dashboard');
+    } else {
+      showToast('Invalid admin email or password', 'error');
     }
   };
 
@@ -45,11 +51,6 @@ export const AdminLogin = () => {
           Sign in to manage your little universe.
         </p>
 
-        {/* Developer Warning Alert */}
-        <div className="p-3 mb-6 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-300 text-[11px] text-left">
-          ⚠️ <strong>Developer Notice:</strong> Temporary frontend authentication. Production authentication must be server-side.
-        </div>
-
         <form onSubmit={handleSubmit} className="space-y-4 text-left">
           <div>
             <label className="block text-[10px] font-mono uppercase font-semibold text-slate-400 mb-1.5">
@@ -61,7 +62,7 @@ export const AdminLogin = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@herlittleuniverse.com"
+                placeholder="arman@example.com"
                 required
                 className="w-full py-3 pl-10 pr-4 rounded-xl bg-slate-900 border border-slate-700 text-white placeholder-slate-500 text-xs focus:outline-none focus:border-rose-500 transition-colors"
               />
@@ -99,7 +100,7 @@ export const AdminLogin = () => {
             <button
               type="button"
               onClick={() => showToast('Password reset link sent to admin email')}
-              className="text-rose-400 hover:text-rose-300 transition-colors"
+              className="text-rose-400 hover:text-rose-300 transition-colors cursor-pointer"
             >
               Forgot password?
             </button>
@@ -107,9 +108,10 @@ export const AdminLogin = () => {
 
           <button
             type="submit"
-            className="w-full mt-4 py-3.5 px-6 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
+            disabled={loading}
+            className="w-full mt-4 py-3.5 px-6 rounded-xl bg-rose-600 hover:bg-rose-500 disabled:opacity-50 text-white text-xs font-semibold uppercase tracking-wider transition-colors shadow-lg cursor-pointer"
           >
-            Sign In
+            {loading ? 'Authenticating...' : 'Sign In'}
           </button>
         </form>
       </div>
